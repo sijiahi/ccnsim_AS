@@ -2,6 +2,7 @@
 #SocialCCNSim, a simulator of caches for Content Centric Networking.
 #
 #Developed by Cesar A. Bernardini Copyright (C) 2014.
+# Copyright (C) 2021 Sijia Zhang <sijia.zhang@buaa.edu.cn>
 #This library is free software; you can redistribute it and/or
 #modify it under the terms of the GNU Library General Public
 #License as published by the Free Software Foundation; either

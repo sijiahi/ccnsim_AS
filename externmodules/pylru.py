@@ -2,6 +2,7 @@
 # a basic dictionary interface.
 
 # Copyright (C) 2006, 2009, 2010, 2011 Jay Hutchinson
+# Copyright (C) 2021 Sijia Zhang <sijia.zhang@buaa.edu.cn>
 
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free

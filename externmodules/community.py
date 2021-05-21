@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# Copyright (C) 2021 Sijia Zhang <sijia.zhang@buaa.edu.cn>
 # -*- coding: utf-8 -*-
 """
 This module implements community detection.
@@ -7,6 +8,7 @@ __all__ = ["partition_at_level", "modularity", "best_partition", "generate_dendo
 __author__ = """Thomas Aynaud (thomas.aynaud@lip6.fr)"""
 #    Copyright (C) 2009 by
 #    Thomas Aynaud <thomas.aynaud@lip6.fr>
+
 #    All rights reserved.
 #    BSD license.
 
