@@ -20,7 +20,8 @@
 #####################################################################
 
 import random
-import Queue
+from multiprocessing import Queue
+
 import sys
 import tempfile
 import sqlite3
@@ -37,7 +38,6 @@ from topology_manager import TopologyManager, Paths, SocialPaths
 import numpy
 
 import logging
-
 logging.basicConfig(filename='example.log',
     level=logging.CRITICAL,
     format='%(asctime)-15s %(message)s'
@@ -47,7 +47,6 @@ class Executor(object):
     def __init__(self, social_graph, topology, cache_size, caching_strategy, cache_policy, sequence_filename = '', mobility_enabled = False, step_printing = [], topology_file = None):
         self.lock = threading.Lock()
         self.condition = threading.Condition()
-        
         # Configuration
         self.conf = {}
         self.conf['caching_strategy'] = caching_strategy
@@ -113,7 +112,10 @@ class Executor(object):
         )
         logging.debug('Loaded caching strategy')
         self.lock.release()
-        
+        self.f = tempfile.NamedTemporaryFile(delete=True, dir='/tmp/')
+        self.conn = sqlite3.connect(self.f.name)
+
+        self.c = self.conn.cursor()
         self.initialize_catalog()
 
         
@@ -126,7 +128,7 @@ class Executor(object):
 
     #TODO: currently not being used
     def initialize_scheduler_from_file(self, filename):
-        self.seq_file = file(filename, 'r')
+        self.seq_file = open(filename, 'r')
         self.seq_n = 0
     def extract_sequence(self):
         
@@ -150,17 +152,14 @@ class Executor(object):
                     self.sched.enter(self.seq_n * 0.01, 0, self.consume_from_server, (int(result.group('user')), pos, "/content/%s"%result.group('dependent').split(',')[0]))
                     #
             else:
-                print "repr line: %s"%repr(line)
+                print("repr line: %s"%repr(line))
                 exit(-1)
             self.seq_n+=1
             line=self.seq_file.readline()
 
     
     def initialize_catalog(self):
-        self.f = tempfile.NamedTemporaryFile(delete=True, dir='/tmp/')
-        self.conn = sqlite3.connect(self.f.name)
 
-        self.c = self.conn.cursor()
 
         #c.execute('''DROP table catalog''')
         self.c.execute('''CREATE TABLE catalog
@@ -184,7 +183,8 @@ class Executor(object):
 
         
     def __del__(self):
-        self.conn.close()
+        if self.conn:
+            self.conn.close()
 
     def producer2(self, social_publisher, position, content, reference = '', topic = 0):
         self.topology_nodes.update_user_position(social_publisher, position)
@@ -297,13 +297,15 @@ class Executor(object):
     def printStats(self):
         return self.caches.stats_summary()
     def printStepSummary(self, timestamp):
-        print "=> {0} {1}".format(timestamp, self.caches.stats_summary())
+        print("=> {0} {1}".format(timestamp, self.caches.stats_summary()))
     def finishSimulation(self):
         self.lock.acquire()
         self.lock.release()
         self.condition.acquire()
         self.condition.notify()
         self.condition.release()
+
+
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
@@ -396,6 +398,7 @@ if __name__ == '__main__':
     CACHE_STRUCTURE = CACHE_STRUCTURE.group(1)
 
     # Import Social Graph
+    #Social Graph is connection between nodes
     G = getattr(__import__('graphs.%s'%SOCIAL_GRAPH), SOCIAL_GRAPH).G
     logging.debug('Social Graph loaded')
 
@@ -404,9 +407,7 @@ if __name__ == '__main__':
     for iteration in range(0, RUNS):
         # Import Topology Graph
         petersen = getattr(__import__('graphs.%s'%TOPOLOGY_GRAPH), TOPOLOGY_GRAPH).G
-        
+        #social_graph, topology, cache_size, caching_strategy, cache_policy, sequence_filename = '', mobility_enabled = False, step_printing = [], topology_file = None
         executor = Executor(G, petersen, CACHE_SIZE, CACHING_STRATEGY, CACHE_STRUCTURE, SEQUENCE_FILE, MOBILITY_ENABLED, STEP_PRINTING, topology_file=TOPOLOGY_GRAPH)
         executor.run()
-        
-        print executor.printStats()
-
+        print(executor.printStats())

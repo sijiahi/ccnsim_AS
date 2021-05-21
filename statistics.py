@@ -31,6 +31,7 @@ class GeneralStats():
         self.expired_elements = []
         self.diversity = []
         self.acceptance_ratio = []
+        self.hop_stretch = {}
         self.lock.release()
     def append(self, cache_hit, stretch, hops_reduction, expired_elements, diversity, acceptance_ratio):
         self.lock.acquire()
@@ -60,13 +61,66 @@ class Stats():
         self._distance = 0
         self._hops_walked = 0
         self._hops_hits = 0
-
+        ##############################
+        self._internal_miss = 0
+        self._internal_hit = 0
+        self._hop_stretched = 0
+        self._interest_num = 0
+        self.round = 0
+        ###############################
         # number of requests issued by end-users satisfied by caches
         self._w = 0
 
         self.accepted = 0
         self.rejected = 0
         self.lock.release()
+    def reset(self):
+        self.lock = threading.Lock()
+        self.lock.acquire()
+        self._miss = 0
+        self._hit = 0
+        self._increase_messages = 0
+        self._interest = 0
+        self._publish = 0
+        self._distance = 0
+        self._hops_walked = 0
+        self._hops_hits = 0
+        
+        ##############################
+        # 内部未满足的请求
+        self._internal_miss = 0
+        # 内部未满足请求而造成的路径延伸
+        self._hop_stretched = 0
+        # 内部满足的请求
+        self._internal_hit = 0
+        # 新的一轮开始
+        self.round += 1
+        ##############################
+        # number of requests issued by end-users satisfied by caches
+        self._w = 0
+
+        self.accepted = 0
+        self.rejected = 0
+        self.lock.release()
+        ###################################
+        # 内部满足的请求
+    def internal_hit(self):
+        self.lock.acquire()
+        self._internal_hit+=1
+        self.lock.release()
+    def internal_miss(self):
+        self.lock.acquire()
+        self._internal_miss+=1
+        self.lock.release()
+    def stretch_hop(self, hop):
+        self.lock.acquire()
+        self._hop_stretched+=hop
+        self.lock.release()
+    def intrest(self):
+        self.lock.acquire()
+        self._interest_num_+=1
+        self.lock.release()
+        ###################################
     def increase_messages(self):
         self._increase_messages+=1
         return self._increase_messages
@@ -182,8 +236,12 @@ class Stats():
             return round(float(self._w)/self._interest, 4)
         except ZeroDivisionError:
             return 0
-
+    def get_round(self):
+        self.lock.acquire()
+        res = self.round
+        self.lock.release()
+        return res
     def summary(self, caches):
-        res = "{0} {1} {2} {3} {4} {5} {6} {7} {8}".format(round(self.get_cache_hit(), 4), round(self.get_stretch(), 4), round(self.get_hops_reduction(), 4), round(self.get_diversity(caches), 4), self.get_caching_operations(), self.get_eviction_operations(), self._w, self._interest, self.get_rch())
+        res = "Round: {12} , internal_hit: {9} , internal_miss: {10} , stretch : {11} , cacheHit: {0} , stretch: {1} hop_reduction: {2} get_diversity: {3} caching_operations: {4} eviction_operations: {5} Satisfied by caches: {6} _interest: {7}, get_rch: {8}".format(round(self.get_cache_hit(), 4), round(self.get_stretch(), 4), round(self.get_hops_reduction(), 4), round(self.get_diversity(caches), 4), self.get_caching_operations(), self.get_eviction_operations(), self._w, self._interest, self.get_rch(), self._internal_hit, self._internal_miss, self._hop_stretched, self.round)
         return res
 

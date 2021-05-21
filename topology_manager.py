@@ -64,30 +64,22 @@ class SocialPaths(Paths):
         return path
 
 #cache.close()
-
-
 class TopologyManager(object):
     def __init__(self, topology, social_graph, topology_nodes_position, enable_mobility = False, topology_file=None):
         assert type(topology_nodes_position) == dict
-
         self.topology = topology
         self.social_graph = social_graph
-
         self.enable_mobility = enable_mobility
-        
         #Coordinates for the nodes and the users
         #First: filter nodes without caching capabilities
         tnp = {}
         for n in topology_nodes_position.keys():
             if self.has_request_capabilities(n):
-               tnp = topology_nodes_position[n]
+                tnp[n] = topology_nodes_position[n]
         topology_nodes_position = None 
-
         self.coords = tnp
         self.coords_user = {}
-
         self.topology_nodes = {}
-
         self.method = None
         self.topology_file = topology_file
         self.initialize_paths()
@@ -96,17 +88,23 @@ class TopologyManager(object):
         if os.path.exists('graphs/'+self.topology_file+'.routes'):
             self.paths = pickle.load(open('graphs/'+self.topology_file+'.routes', 'rb'))
         else:
+            # 将拓扑图生成路由文件（通过前面定义的SocialPaths类）
             self.paths = SocialPaths(self.topology)
+            # 将其保存为路由文件，便于下一步进行设置
             pickle.dump(self.paths, open('graphs/'+self.topology_file+'.routes', 'wb'))
-
+    # 通过两个社交用户来确定其对应的网络节点，并进行路径寻找
     def get_path(self, social_src, social_dst):
         return self.paths.calculate_path(self.topology_nodes[social_src], self.topology_nodes[social_dst])
 
     def set_method(self, method):
         #Decide which method to use
+        #Request Pattern of in
         assert method in ['random', 'geographical', 'onepublisher']
         self.method = method
-
+    # 如果mobility——enabled:
+    #      设置coords_user以及topology_nodes
+    # 如果mobility——not-enabled:
+    #       设置coords_user
     def update_user_position(self, user, position):
         # Assign new coords and then calculate user belonging to the topology_node.
         self.coords_user[user] = position
@@ -121,7 +119,7 @@ class TopologyManager(object):
 
     def update_all_users_position(self):
         #TODO: add feature that users only can be putted in a node without the wr attribute as true
-
+        # 随机将用户与拓扑节点之间建立关系
         if self.method == 'random':
             request_nodes = [n for n in self.topology.nodes() if self.has_request_capabilities(n)]
             res = []
@@ -138,19 +136,20 @@ class TopologyManager(object):
             self.topology_nodes[0] = 0
         else:
             raise Exception('Not implemented method: %s'%self.method)
-
+    
+    #寻找最近的节点
     def closest_node(self, user):
         x, y = self.coords_user[user]
         d = 100*100 # max distance
         n = -2
         for k,v in self.coords.items():
             x1, y1 = v
-
+            # 寻找二维数组中的最小差值项
             # Euclidean distance
             a = numpy.array((x,y))
             b = numpy.array((x1,y1))
             d1 = numpy.linalg.norm(a-b)
-
+            #遍历所有的点，进行欧式距离计算并且替代
             if d1 < d:
                 d = d1
                 n = k
@@ -158,11 +157,11 @@ class TopologyManager(object):
         return n
 
     def has_caching_capabilities(self, node):
-        n = self.topology.node[node]
-        return not (n.has_key('wc') and n['wc'] == True)
+        n = self.topology.nodes[node]
+        return not ('wc'in n.keys()  and n['wc'] == True)
     def has_request_capabilities(self, node):
-        n = self.topology.node[node]
-        return not (n.has_key('wr') and n['wr'] == True)
+        n = self.topology.nodes[node]
+        return not ('wr' in n.keys() and n['wr'] == True)
 
     def __getitem__(self, key):
         return self.get_user_node(key)
@@ -181,7 +180,6 @@ if __name__ == '__main__':
         topology_coords[node] = (random.randint(0, 100),
                                 random.randint(0, 100)
                                 )
-
     t = TopologyManager(topology_g, social_g, topology_coords)
     t.set_method('geographical')
     for user in social_g.nodes():
@@ -189,8 +187,6 @@ if __name__ == '__main__':
                                 random.randint(0, 100)
                                 )
         )
-
     t.update_all_users_position()
-
     for user in social_g.nodes()[:10]:
-        print user, t[user]
+        print(user, t[user])

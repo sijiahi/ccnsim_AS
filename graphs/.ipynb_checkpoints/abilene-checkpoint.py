@@ -1,5 +1,4 @@
 import networkx
-import random
 #Baseline scenarios: telematics.poliba.it/icn-baseline-scenarios
 G = networkx.Graph()
 
@@ -17,5 +16,4 @@ G.add_edge(6, 7)
 G.add_edge(7, 8)
 G.add_edge(8, 9)
 G.add_edge(9, 10)
-for i in random.sample(G.nodes(), len(G.nodes())/2):
-    G.add_node(i, wc=True)
+
