@@ -1,6 +1,6 @@
 #
 from cache_manager import CacheManager
-
+from trend_forecast import predict
 class POP(CacheManager):
     POP_THRESHOLD = 10
     RESET_VALUE = 0
@@ -25,10 +25,16 @@ class POP(CacheManager):
         content_found_caches = False
         r = self.stats.round
         try:
+            # 本轮中访问过，直接加
             self.pop[target][interest][r] += 1
         except:
-            self.pop[target][interest] = {}
-            self.pop[target][interest][r] = 1
+            try:
+                # 过去访问过，可以直接对当前时间加
+                self.pop[target][interest][r] = 1
+            except:
+                # 过去没有访问过，对这个文件进行初始化
+                self.pop[target][interest] = {}
+                self.pop[target][interest][r] = 1
         if self.caches[target].lookup(interest):
             content_found_caches = True
             self.stats.internal_hit()
@@ -39,9 +45,17 @@ class POP(CacheManager):
     
     def retrieve_from_server(self,interest, target_to_server):
         return 0
-    
+    # TODO:
+    # Update cache_target and pre-match
     def cache_decision(self,target, interest):
-        return True
+        if self.stats.round < 3:
+            return True
+        else:
+            if interest in self.cache_target[target]:
+                return True
+            else:
+                return False
+                
         
     def retrieve_from_caches(self, interest, path):
         content_found_caches = False
@@ -68,3 +82,16 @@ class POP(CacheManager):
             self.pop[p][interest] = self.RESET_VALUE
                 
         return (content_found_caches, i)
+    def update_predict_result(self):
+        p = predict()
+        prediction_ranking = p.get_prediction_result(self.pop,2)
+        cache_target = {}
+        for node in prediction_ranking.keys():
+            size = self.CACHE_SIZE
+            try:
+                cache_target[node] = list(prediction_ranking[node].keys())[:size]
+            except:
+                cache_target[node] = list(prediction_ranking[node].keys())
+        #print("Target", cache_target)
+        self.cache_target = cache_target
+        

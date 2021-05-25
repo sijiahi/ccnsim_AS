@@ -67,7 +67,7 @@ class Stats():
         self._internal_hit = 0
         self._hop_stretched = 0
         self._interest_num = 0
-        self.round = 0
+        self.round = 1
         ###############################
         # number of requests issued by end-users satisfied by caches
         self._w = 0
