@@ -114,11 +114,12 @@ def gen_biased_zipf_requests(alpha = 1,number_of_content = 100, number_of_reques
     return req, pattern
 
 
-# In[23]:
+# In[31]:
 
 
 def gen_bilateral_biased_zipf_requests(alpha = 1,number_of_content = 100, number_of_request = 1000, offset = 0):
     zipf_gen = zipf_generator(alpha = alpha,number = number_of_content//2)
+    
     contents, zipf_distrib = zipf_gen.generate()
     assert len(zipf_distrib) == number_of_content//2
     #number_of_content = len(zipf)
@@ -126,9 +127,9 @@ def gen_bilateral_biased_zipf_requests(alpha = 1,number_of_content = 100, number
     pattern = {}
     for i,content in enumerate(contents):
         req+=([(content+offset+number_of_content//2)%number_of_content]*int(round(number_of_request*zipf_distrib[i],0)))
-        req+=([(-content+offset+number_of_content//2)%number_of_content]*int(round(number_of_request*zipf_distrib[i],0)))
+        req+=([(-content+1+offset+number_of_content//2)%number_of_content]*int(round(number_of_request*zipf_distrib[i],0)))
         pattern[(content+offset+number_of_content//2)%number_of_content] = int(round(number_of_request*zipf_distrib[i],0))
-        pattern[(-content+offset+number_of_content//2)%number_of_content] = int(round(number_of_request*zipf_distrib[i],0))
+        pattern[(-content+1+offset+number_of_content//2)%number_of_content] = int(round(number_of_request*zipf_distrib[i],0))
     shuffle(req)
     pattern = dict(sorted(pattern.items(), key = lambda item: item[0]))
     return req, pattern
@@ -136,10 +137,14 @@ def gen_bilateral_biased_zipf_requests(alpha = 1,number_of_content = 100, number
 
 # # This is to give an API for request generating
 
-# req_10000, pattern = gen_biased_zipf_requests(alpha = 1,number_of_content = 100, number_of_request = 1000, offset = 0)
-# plt.plot(pattern.keys(), pattern.values())
-# plt.title('request pattern')
-# plt.show()
+# In[32]:
+
+
+req_10000, pattern = gen_bilateral_biased_zipf_requests(alpha = 1,number_of_content = 100, number_of_request = 1000, offset = 0)
+plt.plot(pattern.keys(), pattern.values())
+plt.title('request pattern')
+plt.show()
+
 
 # In[ ]:
 

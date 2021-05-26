@@ -48,7 +48,7 @@ class POP(CacheManager):
     # TODO:
     # Update cache_target and pre-match
     def cache_decision(self,target, interest):
-        if self.stats.round < 3:
+        if self.stats.round <= 3:
             return True
         else:
             if interest in self.cache_target[target]:
@@ -83,8 +83,12 @@ class POP(CacheManager):
                 
         return (content_found_caches, i)
     def update_predict_result(self):
+        
+        if self.stats.round <= 2:
+            return
+        print("Making prediction!")
         p = predict()
-        prediction_ranking = p.get_prediction_result(self.pop,2)
+        prediction_ranking = p.get_prediction_result(self.pop,self.stats.round)
         cache_target = {}
         for node in prediction_ranking.keys():
             size = self.CACHE_SIZE
@@ -94,4 +98,4 @@ class POP(CacheManager):
                 cache_target[node] = list(prediction_ranking[node].keys())
         #print("Target", cache_target)
         self.cache_target = cache_target
-        
+        print("Finished making prediction! ")

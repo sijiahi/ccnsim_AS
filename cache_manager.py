@@ -26,7 +26,7 @@ import re
 
 import externmodules.community
 
-from statistics import Stats, GeneralStats
+from statistics_ import Stats, GeneralStats
 
 import logging
 def setup_logger1(logger_name, log_file, level=logging.INFO, format_style = '%(asctime)-15s %(message)s'):

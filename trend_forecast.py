@@ -21,8 +21,10 @@ class predict():
         self.damped_trend = damped_trend
     def pre(self, request_rate, rounds):
         request_rate_series = pd.Series(data = request_rate, index = range(rounds))
+        #print(request_rate_series)
         request_rate_series = request_rate_series.fillna(0).add(1)
         model = Holt(request_rate_series,exponential = self.exponential, damped_trend = self.damped_trend )
+        #print(request_rate_series)
         fit = model.fit(smoothing_level = self.smoothing_level, smoothing_trend = self.smoothing_trend, optimized = self.optimized)        
         #fit = model.fit(smoothing_level = self.smoothing_level, smoothing_slope = self.smoothing_slope, optimized = self.optimized)
         #print(fit.forecast(1))
