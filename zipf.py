@@ -140,10 +140,10 @@ def gen_bilateral_biased_zipf_requests(alpha = 1,number_of_content = 100, number
 # In[32]:
 
 
-req_10000, pattern = gen_bilateral_biased_zipf_requests(alpha = 1,number_of_content = 100, number_of_request = 1000, offset = 0)
-plt.plot(pattern.keys(), pattern.values())
-plt.title('request pattern')
-plt.show()
+# req_10000, pattern = gen_bilateral_biased_zipf_requests(alpha = 1,number_of_content = 100, number_of_request = 1000, offset = 0)
+# plt.plot(pattern.keys(), pattern.values())
+# plt.title('request pattern')
+# plt.show()
 
 
 # In[ ]:

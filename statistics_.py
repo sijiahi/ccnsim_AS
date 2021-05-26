@@ -242,7 +242,32 @@ class Stats():
         res = self.round
         self.lock.release()
         return res
+    def get_hit(self):
+        self.lock.acquire()
+        res = self._hit
+        self.lock.release()
+        return res
+    def get_round(self):
+        self.lock.acquire()
+        res = self.round
+        self.lock.release()
+        return res
+    def get_hop_stretched(self):
+        self.lock.acquire()
+        res = self._hop_stretched
+        self.lock.release()
+        return res
+    def get_internal_hit(self):
+        self.lock.acquire()
+        res = self._internal_hit
+        self.lock.release()
+        return res
+    def get_internal_miss(self):
+        self.lock.acquire()
+        res = self._internal_miss
+        self.lock.release()
+        return res
     def summary(self, caches):
-        res = "Round: {12} , internal_hit: {9} , internal_miss: {10} , stretch : {11} , cacheHit: {0} , stretch: {1} hop_reduction: {2} get_diversity: {3} caching_operations: {4} eviction_operations: {5} Satisfied by caches: {6} _interest: {7}, get_rch: {8}".format(round(self.get_cache_hit(), 4), round(self.get_stretch(), 4), round(self.get_hops_reduction(), 4), round(self.get_diversity(caches), 4), self.get_caching_operations(), self.get_eviction_operations(), self._w, self._interest, self.get_rch(), self._internal_hit, self._internal_miss, self._hop_stretched, self.round)
+        res = "Round: {12} , internal_hit: {9} , internal_miss: {10} , stretch : {11} , cacheHit: {0} , stretch: {1} hop_reduction: {2} get_diversity: {3} caching_operations: {4} eviction_operations: {5} Satisfied by caches: {6} _interest: {7}, get_rch: {8}".format(self.get_hit(), round(self.get_stretch(), 4), round(self.get_hops_reduction(), 4), round(self.get_diversity(caches), 4), self.get_caching_operations(), self.get_eviction_operations(), self._w, self._interest, self.get_rch(), self.get_internal_hit(), self.get_internal_miss(), self.get_hop_stretched(), self.get_round())
         return res
 

@@ -144,8 +144,8 @@ class CacheManager(object):
             res = self.caches[node].lookup(interest)
             if res:
                 self.stats.hit()
-            else:
-                self.stats.miss()
+            #else:
+            #    self.stats.miss()
         else:
             res = False
         return res
