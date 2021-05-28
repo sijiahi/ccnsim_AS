@@ -66,8 +66,10 @@ class Stats():
         self._internal_miss = 0
         self._internal_hit = 0
         self._hop_stretched = 0
+        self._original_hops = 0
         self._interest_num = 0
         self.round = 1
+        self._as_hops = 0
         ###############################
         # number of requests issued by end-users satisfied by caches
         self._w = 0
@@ -96,6 +98,9 @@ class Stats():
         self._internal_hit = 0
         # 新的一轮开始
         self.round += 1
+        # 新一轮的跳数
+        self._original_hops = 0
+        self._as_hops = 0
         ##############################
         # number of requests issued by end-users satisfied by caches
         self._w = 0
@@ -121,6 +126,19 @@ class Stats():
         self.lock.acquire()
         self._interest_num_+=1
         self.lock.release()
+    def add_original_hop(self,hops):
+        self.lock.acquire()
+        self._original_hops+=hops
+        self.lock.release()
+    def add_as_hops(self,hops):
+        self.lock.acquire()
+        self._as_hops+=hops
+        self.lock.release()
+    def get_hops(self):
+        self.lock.acquire()
+        res = self._as_hops, self._original_hops
+        self.lock.release()
+        return res
         ###################################
     def increase_messages(self):
         self._increase_messages+=1

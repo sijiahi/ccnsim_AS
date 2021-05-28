@@ -24,6 +24,7 @@ class POP(CacheManager):
     def retrieve_from_target(self, interest, target,path_to_target):
         content_found_caches = False
         r = self.stats.round
+        # 流行度计算
         try:
             # 本轮中访问过，直接加
             self.pop[target][interest][r] += 1
@@ -35,6 +36,9 @@ class POP(CacheManager):
                 # 过去没有访问过，对这个文件进行初始化
                 self.pop[target][interest] = {}
                 self.pop[target][interest][r] = 1
+        # 内部流量计算
+        self.stats.add_as_hops(len(path_to_target)-1)
+        # 查看缓存
         if self.caches[target].lookup(interest):
             content_found_caches = True
             self.stats.internal_hit()
@@ -44,6 +48,7 @@ class POP(CacheManager):
         return content_found_caches
     
     def retrieve_from_server(self,interest, target_to_server):
+        self.stats.add_as_hops(len(target_to_server)-1)
         return 0
     # TODO:
     # Update cache_target and pre-match
