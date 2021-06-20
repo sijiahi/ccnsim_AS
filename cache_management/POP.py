@@ -20,6 +20,21 @@ class POP(CacheManager):
             if self.cache_decision(target, interest) == True:
                 if self.topology_manager.has_caching_capabilities(target):
                     self.store_cache(target, interest)
+    
+    # This is to calculate the value of strenched hops
+    def retrieve_content1(self, interest, target, path_to_target, server, target_to_server):
+        retrieved_content = False
+        retrieved_content = self.retrieve_from_target(interest, target, path_to_target)
+        res = len(path_to_target)-1
+        # TODO: 从Server中获取
+        if not retrieved_content:
+            self.retrieve_from_server(interest, target_to_server)
+            res+=len(target_to_server)-1+3
+            if self.cache_decision(target, interest) == True:
+                if self.topology_manager.has_caching_capabilities(target):
+                    self.store_cache(target, interest)
+                    
+        return res
         
     def retrieve_from_target(self, interest, target,path_to_target):
         content_found_caches = False
@@ -48,7 +63,7 @@ class POP(CacheManager):
         return content_found_caches
     
     def retrieve_from_server(self,interest, target_to_server):
-        self.stats.add_as_hops(len(target_to_server)-1)
+        self.stats.add_as_hops(len(target_to_server)+3)
         return 0
     # TODO:
     # Update cache_target and pre-match

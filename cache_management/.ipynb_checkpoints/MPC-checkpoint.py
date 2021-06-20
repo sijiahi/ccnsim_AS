@@ -22,6 +22,7 @@ class MPC(CacheManager):
 
             if self.caches[p].lookup(interest):
                 content_found_caches = True
+                ####计算命中的跳数
                 self.stats.hit()
                 break
             else:
@@ -36,5 +37,8 @@ class MPC(CacheManager):
                 if self.topology_manager.has_caching_capabilities(n):
                     self.store_cache(n, interest)
             self.mpc[p][interest] = self.RESET_VALUE
-                
+        if i ==len(path)-1:
+            self.stats.add_as_hops(i+4)
+        else:
+            self.stats.add_as_hops(i+1)
         return (content_found_caches, i)

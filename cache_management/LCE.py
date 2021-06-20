@@ -23,5 +23,8 @@ class LCE(CacheManager):
                 break
             else:
                 self.store_cache(p, interest)
-
+        if i ==len(path)-1:
+            self.stats.add_as_hops(i+4)
+        else:
+            self.stats.add_as_hops(i+1)
         return (content_found_caches, i)

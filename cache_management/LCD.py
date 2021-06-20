@@ -31,5 +31,8 @@ class LCD(CacheManager):
             next = self.get_next_node(i, path)
             if next >= 0:
                 self.store_cache(path[next], interest)
-
+        if i ==len(path)-1:
+            self.stats.add_as_hops(i+4)
+        else:
+            self.stats.add_as_hops(i+1)
         return (content_found_caches, i)
